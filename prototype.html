@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Crop & Overlay Tool</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    #controls {
+      margin: 10px 0;
+    }
+
+    #viewport {
+      position: relative;
+      width: fit-content;
+      border: 1px solid #ccc;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #viewport canvas {
+      display: block;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    input[type="file"],
+    input[type="range"],
+    button {
+      margin-top: 10px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Crop & Overlay Tool</h1>
+
+  <input type="file" id="imageUpload" accept="image/*">
+
+  <div id="controls">
+    <label>
+      Zoom:
+      <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1" disabled>
+    </label>
+    <button id="resetBtn" disabled>Reset</button>
+    <button id="downloadBtn" onclick="downloadImage()" disabled>Download Result</button>
+  </div>
+
+  <div id="viewport">
+    <canvas id="mainCanvas"></canvas>
+    <img id="overlay" src="overlay.png" alt="Overlay">
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageUpload');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const overlay = document.getElementById('overlay');
+
+    let userImage = null;
+    let overlayImage = new Image();
+    overlayImage.src = 'overlay.png';
+
+    let scale = 1;
+    let pos = { x: 0, y: 0 };
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let lastTouchDistance = null;
+
+    overlayImage.onload = () => {
+      canvas.width = overlayImage.width;
+      canvas.height = overlayImage.height;
+      overlay.width = overlayImage.width;
+      overlay.height = overlayImage.height;
+    };
+
+    function resetPosition() {
+      if (!userImage) return;
+      scale = 1;
+      zoomSlider.value = scale;
+      pos = {
+        x: (canvas.width - userImage.width) / 2,
+        y: (canvas.height - userImage.height) / 2
+      };
+      draw();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (userImage) {
+        const w = userImage.width * scale;
+        const h = userImage.height * scale;
+
+        // Snap boundaries (no white gaps)
+        const minX = Math.min(0, canvas.width - w);
+        const minY = Math.min(0, canvas.height - h);
+        const maxX = Math.max(0, canvas.width - w);
+        const maxY = Math.max(0, canvas.height - h);
+
+        pos.x = Math.min(maxX, Math.max(minX, pos.x));
+        pos.y = Math.min(maxY, Math.max(minY, pos.y));
+
+        ctx.drawImage(userImage, pos.x, pos.y, w, h);
+      }
+
+      ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadImage() {
+        // draw(); // Ensure canvas is up to date
+      const link = document.createElement('a');
+      link.download = 'benfica-acima-de-tudo.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    imageInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        userImage = new Image();
+        userImage.onload = () => {
+          resetPosition();
+          zoomSlider.disabled = false;
+          resetBtn.disabled = false;
+          downloadBtn.disabled = false;
+        };
+        userImage.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    zoomSlider.addEventListener('input', () => {
+      scale = parseFloat(zoomSlider.value);
+      draw();
+    });
+
+    // Drag (Mouse)
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      dragStart.x = e.offsetX - pos.x;
+      dragStart.y = e.offsetY - pos.y;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      pos.x = e.offsetX - dragStart.x;
+      pos.y = e.offsetY - dragStart.y;
+      draw();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Touch drag/zoom
+    canvas.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        dragStart.x = e.touches[0].clientX - pos.x;
+        dragStart.y = e.touches[0].clientY - pos.y;
+      } else if (e.touches.length === 2) {
+        lastTouchDistance = getTouchDistance(e.touches);
+      }
+    });
+
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (e.touches.length === 1 && isDragging) {
+        pos.x = e.touches[0].clientX - dragStart.x;
+        pos.y = e.touches[0].clientY - dragStart.y;
+        draw();
+      } else if (e.touches.length === 2) {
+        const currentDistance = getTouchDistance(e.touches);
+        if (lastTouchDistance) {
+          const delta = currentDistance / lastTouchDistance;
+          scale *= delta;
+          scale = Math.max(0.5, Math.min(3, scale));
+          zoomSlider.value = scale;
+          draw();
+        }
+        lastTouchDistance = currentDistance;
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+      lastTouchDistance = null;
+    });
+
+    function getTouchDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Double-click to reset
+    canvas.addEventListener('dblclick', () => {
+      resetPosition();
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', resetPosition);
+  </script>
+</body>
+</html>
