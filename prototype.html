@@ -3,62 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Image Crop & Overlay Tool</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-
-    #controls {
-      margin: 10px 0;
-    }
-
-    #viewport {
-      position: relative;
-      width: fit-content;
-      border: 1px solid #ccc;
-      overflow: hidden;
-      touch-action: none;
-    }
-
-    #viewport canvas {
-      display: block;
-    }
-
-    #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
-
-    input[type="file"],
-    input[type="range"],
-    button {
-      margin-top: 10px;
-      display: block;
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="theme.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,700&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700">
 </head>
 <body>
-  <h1>Image Crop & Overlay Tool</h1>
+  <header>
+    <h1>CRIA O TEU PERFIL<br>ACIMA DE TUDO</h1>
+  </header>
 
-  <input type="file" id="imageUpload" accept="image/*">
+  <label for="imageUpload" id="fileLabel" class="button button-secondary">ESCOLHER FICHEIRO</label>
+  <input type="file" id="imageUpload" name="imageUpload" accept="image/*">
 
   <div id="controls">
     <label>
       Zoom:
       <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1" disabled>
     </label>
-    <button id="resetBtn" disabled>Reset</button>
-    <button id="downloadBtn" onclick="downloadImage()" disabled>Download Result</button>
+    <button id="resetBtn" class="button button-secondary" disabled>Reset</button>
   </div>
-
+  
   <div id="viewport">
     <canvas id="mainCanvas"></canvas>
     <img id="overlay" src="overlay.png" alt="Overlay">
   </div>
-
+  
+  <button id="downloadBtn" onclick="downloadImage()" class="button button-primary" disabled>Download</button>
   <script>
     const imageInput = document.getElementById('imageUpload');
     const zoomSlider = document.getElementById('zoomSlider');
