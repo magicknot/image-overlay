@@ -1,8 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Image Crop & Overlay Tool</title>
+  <meta charset="UTF-8"><!-- Primary Meta Tags -->
+  <title>Noronha Lopes 2025 - Criar Perfil de Apoio</title>
+  <meta name="title" content="Noronha Lopes 2025 - Criar Perfil de Apoio>
+  <meta name="description" content="Cria o teu perfil de apoio a Noronha Lopes nas eleições do Benfica 2025. Personaliza a tua foto com o símbolo de apoio e partilha nas redes sociais.">
+  <meta name="keywords" content="Noronha Lopes, perfil, eleições Benfica 2025, apoio, avatar, foto perfil, Benfica">
+  <meta name="author" content="Noronha Lopes 2025">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Canonical URL - UPDATE THIS when you know the final URL -->
+  <link rel="canonical" href="https://noronhalopes2025.pt/perfil">
+  
+  <!-- Favicon from main site -->
+  <link rel="icon" type="image/x-icon" href="https://noronhalopes2025.pt/favicon.ico">
+  <link rel="apple-touch-icon" href="https://noronhalopes2025.pt/apple-touch-icon.png">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://noronhalopes2025.pt/perfil">
+  <meta property="og:title" content="Noronha Lopes 2025 - Criar Perfil de Apoio">
+  <meta property="og:description" content="Cria o teu perfil de apoio a Noronha Lopes nas eleições do Benfica 2025. Personaliza a tua foto com o símbolo de apoio.">
+  <meta property="og:image" content="https://noronhalopes2025.pt/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="pt_PT">
+  <meta property="og:site_name" content="Noronha Lopes 2025">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://noronhalopes2025.pt/perfil">
+  <meta name="twitter:title" content="Noronha Lopes 2025 - Criar Perfil de Apoio">
+  <meta name="twitter:description" content="Cria o teu perfil de apoio a Noronha Lopes nas eleições do Benfica 2025.">
+  <meta name="twitter:image" content="https://noronhalopes2025.pt/og-image.jpg">
+  
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Criador de Perfil Noronha Lopes 2025",
+    "description": "Ferramenta para criar perfis de apoio a Noronha Lopes nas eleições do Benfica 2025",
+    "url": "https://noronhalopes2025.pt/perfil",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Noronha Lopes 2025",
+      "url": "https://noronhalopes2025.pt"
+    }
+  }
+  </script>
   <link rel="stylesheet" type="text/css" href="theme.css" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,700&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700">
@@ -30,194 +83,6 @@
     
     <button id="downloadBtn" onclick="downloadImage()" class="button button-primary" disabled>Download</button>
   </main>
-
-  <script>
-    const imageInput = document.getElementById('imageUpload');
-    const zoomSlider = document.getElementById('zoomSlider');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let userImage = null;
-    let defaultImage = null;
-    let isDefaultImage = true;
-    let overlayImage = new Image();
-
-    let scale = 1;
-    let pos = { x: 0, y: 0 };
-    let isDragging = false;
-    let dragStart = { x: 0, y: 0 };
-    let lastTouchDistance = null;
-
-    // Load the overlay image
-    overlayImage.onload = () => {
-      canvas.width = overlayImage.width;
-      canvas.height = overlayImage.height;
-      // Once overlay is loaded, load the default preview image
-      loadDefaultImage();
-    };
-    overlayImage.src = 'overlay.png';
-
-    function loadDefaultImage() {
-      defaultImage = new Image();
-      defaultImage.crossOrigin = "anonymous";
-      defaultImage.onload = () => {
-        userImage = defaultImage;
-        isDefaultImage = true;
-        scale = 0.7; // Zoom out to 70%
-        zoomSlider.value = scale;
-        pos = {
-          x: (canvas.width - defaultImage.width * scale) / 2,
-          y: (canvas.height - defaultImage.height * scale) / 2
-        };
-        draw();
-        // Enable zoom and reset for default image, but NOT download
-        zoomSlider.disabled = false;
-        resetBtn.disabled = false;
-        downloadBtn.disabled = true;
-      };
-      defaultImage.src = 'default-preview.png';
-    }
-
-    function resetPosition() {
-      if (!userImage) return;
-      scale = isDefaultImage ? 0.7 : 1; // Keep 0.7 for default, 1 for user images
-      zoomSlider.value = scale;
-      pos = {
-        x: (canvas.width - userImage.width * scale) / 2,
-        y: (canvas.height - userImage.height * scale) / 2
-      };
-      draw();
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (userImage) {
-        const w = userImage.width * scale;
-        const h = userImage.height * scale;
-
-        // Snap boundaries (no white gaps)
-        const minX = Math.min(0, canvas.width - w);
-        const minY = Math.min(0, canvas.height - h);
-        const maxX = Math.max(0, canvas.width - w);
-        const maxY = Math.max(0, canvas.height - h);
-
-        pos.x = Math.min(maxX, Math.max(minX, pos.x));
-        pos.y = Math.min(maxY, Math.max(minY, pos.y));
-
-        ctx.drawImage(userImage, pos.x, pos.y, w, h);
-      }
-
-      // Draw the overlay on top
-      ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
-    }
-
-    function downloadImage() {
-      // Only allow download if user uploaded their own image
-      if (isDefaultImage) return;
-      
-      const link = document.createElement('a');
-      link.download = 'perfil-noronha-lopes.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }
-
-    imageInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        userImage = new Image();
-        userImage.onload = () => {
-          isDefaultImage = false; // User uploaded their own image
-          resetPosition();
-          zoomSlider.disabled = false;
-          resetBtn.disabled = false;
-          downloadBtn.disabled = false; // NOW enable download
-        };
-        userImage.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    zoomSlider.addEventListener('input', () => {
-      scale = parseFloat(zoomSlider.value);
-      draw();
-    });
-
-    // Drag (Mouse)
-    canvas.addEventListener('mousedown', e => {
-      isDragging = true;
-      const rect = canvas.getBoundingClientRect();
-      dragStart.x = (e.clientX - rect.left) * (canvas.width / rect.width) - pos.x;
-      dragStart.y = (e.clientY - rect.top) * (canvas.height / rect.height) - pos.y;
-    });
-
-    canvas.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      const rect = canvas.getBoundingClientRect();
-      pos.x = (e.clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
-      pos.y = (e.clientY - rect.top) * (canvas.height / rect.height) - dragStart.y;
-      draw();
-    });
-
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
-
-    // Touch drag/zoom
-    canvas.addEventListener('touchstart', e => {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        const rect = canvas.getBoundingClientRect();
-        dragStart.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width) - pos.x;
-        dragStart.y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height) - pos.y;
-      } else if (e.touches.length === 2) {
-        lastTouchDistance = getTouchDistance(e.touches);
-      }
-    });
-
-    canvas.addEventListener('touchmove', e => {
-      e.preventDefault();
-      if (e.touches.length === 1 && isDragging) {
-        const rect = canvas.getBoundingClientRect();
-        pos.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
-        pos.y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height) - dragStart.y;
-        draw();
-      } else if (e.touches.length === 2) {
-        const currentDistance = getTouchDistance(e.touches);
-        if (lastTouchDistance) {
-          const delta = currentDistance / lastTouchDistance;
-          scale *= delta;
-          scale = Math.max(0.5, Math.min(3, scale));
-          zoomSlider.value = scale;
-          draw();
-        }
-        lastTouchDistance = currentDistance;
-      }
-    }, { passive: false });
-
-    window.addEventListener('touchend', () => {
-      isDragging = false;
-      lastTouchDistance = null;
-    });
-
-    function getTouchDistance(touches) {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    // Double-click to reset
-    canvas.addEventListener('dblclick', () => {
-      resetPosition();
-    });
-
-    // Reset button
-    resetBtn.addEventListener('click', resetPosition);
-  </script>
+  <script src="script.js" defer></script>
 </body>
 </html>
