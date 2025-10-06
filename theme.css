@@ -112,7 +112,7 @@ body {
 
 header {
   text-align: center;
-  margin-top: 3.5rem;
+  margin-top: 1rem;
   margin-bottom: 2rem;
 }
 
@@ -233,8 +233,8 @@ h1 {
 #viewport {
   position: relative;
   margin-bottom: 1rem;
-  width: 85vw;
-  height: 85vw;
+  width: 75vw;
+  height: 75vw;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -253,11 +253,15 @@ h1 {
   cursor: grabbing;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) {  
   html {
     font-size: 16px;
   }
-  
+
+  header {
+    margin-top: 3.5rem;
+  }
+
   h1 {
     font-size: clamp(2rem, 6vw, 4rem);
   }
