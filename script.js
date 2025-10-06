@@ -18,8 +18,8 @@ let lastTouchDistance = null;
 
 // Load the overlay image
 overlayImage.onload = () => {
-    canvas.width = overlayImage.width;
-    canvas.height = overlayImage.height;
+    canvas.width = Math.min(overlayImage.width/2, 500);
+    canvas.height = Math.min(overlayImage.height/2, 500);
     // Once overlay is loaded, load the default preview image
     loadDefaultImage();
 };
@@ -31,28 +31,30 @@ function loadDefaultImage() {
     defaultImage.onload = () => {
     userImage = defaultImage;
     isDefaultImage = true;
-    scale = 0.7; // Zoom out to 70%
+    scale = 0.3; // Zoom out to 70%
     zoomSlider.value = scale;
     pos = {
-        x: (canvas.width - defaultImage.width * scale) / 2 - 50,
-        y: (canvas.height - defaultImage.height * scale) / 2 + 250
+        x: (canvas.width - defaultImage.width * scale) / 2,
+        y: (canvas.height - defaultImage.height * scale) / 2 + 100
     };
     draw();
-    // Enable zoom and reset for default image, but NOT download
-    zoomSlider.disabled = false;
-    resetBtn.disabled = false;
+    zoomSlider.disabled = true;
+    resetBtn.disabled = true;
     downloadBtn.disabled = true;
     };
     defaultImage.src = 'default-preview.png';
 }
 
 function resetPosition() {
-    if (!userImage) return;
-    scale = isDefaultImage ? 0.7 : 1; // Keep 0.7 for default, 1 for user images
+    if (!userImage || isDefaultImage) {
+        return
+    };
+
+    scale = isDefaultImage ? 0.7 : 1;
     zoomSlider.value = scale;
     pos = {
-    x: (canvas.width - userImage.width * scale) / 2,
-    y: (canvas.height - userImage.height * scale) / 2
+        x: (canvas.width - userImage.width * scale) / 2,
+        y: (canvas.height - userImage.height * scale) / 2
     };
     draw();
 }
@@ -116,6 +118,10 @@ zoomSlider.addEventListener('input', () => {
 
 // Drag (Mouse)
 canvas.addEventListener('mousedown', e => {
+    if (isDefaultImage) {
+        return
+    }
+
     isDragging = true;
     const rect = canvas.getBoundingClientRect();
     dragStart.x = (e.clientX - rect.left) * (canvas.width / rect.width) - pos.x;
@@ -123,6 +129,10 @@ canvas.addEventListener('mousedown', e => {
 });
 
 canvas.addEventListener('mousemove', e => {
+    if (isDefaultImage) {
+        return
+    }
+
     if (!isDragging) return;
     const rect = canvas.getBoundingClientRect();
     pos.x = (e.clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
@@ -131,11 +141,19 @@ canvas.addEventListener('mousemove', e => {
 });
 
 window.addEventListener('mouseup', () => {
+    if (isDefaultImage) {
+        return
+    }
+
     isDragging = false;
 });
 
 // Touch drag/zoom
 canvas.addEventListener('touchstart', e => {
+    if (isDefaultImage) {
+        return
+    }
+
     if (e.touches.length === 1) {
     isDragging = true;
     const rect = canvas.getBoundingClientRect();
@@ -148,6 +166,11 @@ canvas.addEventListener('touchstart', e => {
 
 canvas.addEventListener('touchmove', e => {
     e.preventDefault();
+
+    if (isDefaultImage) {
+        return
+    }
+    
     if (e.touches.length === 1 && isDragging) {
     const rect = canvas.getBoundingClientRect();
     pos.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
@@ -167,6 +190,10 @@ canvas.addEventListener('touchmove', e => {
 }, { passive: false });
 
 window.addEventListener('touchend', () => {
+    if (isDefaultImage) {
+        return
+    }
+    
     isDragging = false;
     lastTouchDistance = null;
 });
