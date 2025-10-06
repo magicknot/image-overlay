@@ -88,23 +88,35 @@ h6 {
   }
 }
 
+/* theme */
+
+@font-face {
+  font-family: 'Mango Grotesque';
+  src: url('MangoGrotesque-SemiBoldItalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+}
+
 body {
   font-family: Poppins, Arial, sans-serif;
-  background: #ED1C24;
+  background: #EB252C;
   color: white;
+}
+
+header {
+  text-align: center;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+}
+
+main {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-header {
-  text-align: center;
-  margin-bottom: 40px;
-  margin-top: 4rem;
-  margin-bottom: 2rem;
-}
-
 h1 {
+  font-family: 'Mango Grotesque', Arial, sans-serif;
   font-weight: 600;
   font-style: italic;
   font-size: clamp(2rem, 6vw, 4rem);
@@ -116,7 +128,7 @@ h1 {
 
 .button {
   display: inline-block;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   padding: 1rem 1.5rem;
   transition: background 0.2s ease;
 
@@ -134,14 +146,15 @@ h1 {
 }
 
 .button-primary {
-  background: color;
+  background: white;
+  color: #EB252C;
   font-weight: 600;
 }
 
 .button-secondary:hover:not(:disabled) {
   background: white;
-  border: 1px solid #ED1C24;
-  color: #ED1C24;
+  border: 1px solid #EB252C;
+  color: #EB252C;
 }
 
 .button:disabled {
@@ -157,8 +170,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
   width: 100%;
   max-width: 400px;
 }
@@ -170,7 +182,7 @@ h1 {
   gap: 1rem;
   font-size: 1.2rem;
   font-weight: bold;
-  letter-spacing: 0.1em;
+  letter-spacing: 0em;
   text-transform: uppercase;
 }
 
@@ -189,7 +201,7 @@ h1 {
   width: 20px;
   height: 20px;
   background: white;
-  border: 3px solid #ED1C24;
+  border: 3px solid #EB252C;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -198,7 +210,7 @@ h1 {
   width: 20px;
   height: 20px;
   background: white;
-  border: 3px solid #ED1C24;
+  border: 3px solid #EB252C;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -208,26 +220,13 @@ h1 {
   cursor: not-allowed;
 }
 
-#downloadBtn {
-  background: white;
-  color: #ED1C24;
-  border: none;
-  padding: 14px 50px;
-  font-size: 1.1rem;
-}
-
-#downloadBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.9);
-}
-
 #viewport {
   position: relative;
-  margin-bottom: 40px;
-  width: 400px;
-  height: 400px;
+  margin-bottom: 1rem;
+  width: 22rem;
+  height: 22rem;
   border-radius: 50%;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.1);
 }
 
 #mainCanvas {
@@ -242,36 +241,4 @@ h1 {
 
 #mainCanvas:active {
   cursor: grabbing;
-}
-
-#overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-@media (max-width: 768px) {
-  body {
-    padding: 20px 15px;
-  }
-  h1 {
-    font-size: clamp(1.5rem, 8vw, 3rem);
-  }
-  #viewport {
-    width: 320px;
-    height: 320px;
-  }
-  #zoomSlider {
-    width: 240px;
-  }
-  button {
-    font-size: 0.9rem;
-  }
-  #downloadBtn {
-    padding: 12px 40px;
-    font-size: 1rem;
-  }
 }

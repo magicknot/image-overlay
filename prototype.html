@@ -12,23 +12,25 @@
     <h1>CRIA O TEU PERFIL<br>ACIMA DE TUDO</h1>
   </header>
 
-  <label for="imageUpload" id="fileLabel" class="button button-secondary">ESCOLHER FICHEIRO</label>
-  <input type="file" id="imageUpload" name="imageUpload" accept="image/*">
+  <main>
+    <label for="imageUpload" id="fileLabel" class="button button-secondary">ESCOLHER FICHEIRO</label>
+    <input type="file" id="imageUpload" name="imageUpload" accept="image/*">
+  
+    <div id="controls">
+      <label>
+        Zoom:
+        <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1" disabled>
+      </label>
+      <button id="resetBtn" class="button button-secondary" disabled>Reset</button>
+    </div>
+    
+    <div id="viewport">
+      <canvas id="mainCanvas"></canvas>
+    </div>
+    
+    <button id="downloadBtn" onclick="downloadImage()" class="button button-primary" disabled>Download</button>
+  </main>
 
-  <div id="controls">
-    <label>
-      Zoom:
-      <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1" disabled>
-    </label>
-    <button id="resetBtn" class="button button-secondary" disabled>Reset</button>
-  </div>
-  
-  <div id="viewport">
-    <canvas id="mainCanvas"></canvas>
-    <img id="overlay" src="overlay.png" alt="Overlay">
-  </div>
-  
-  <button id="downloadBtn" onclick="downloadImage()" class="button button-primary" disabled>Download</button>
   <script>
     const imageInput = document.getElementById('imageUpload');
     const zoomSlider = document.getElementById('zoomSlider');
@@ -36,11 +38,11 @@
     const resetBtn = document.getElementById('resetBtn');
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
-    const overlay = document.getElementById('overlay');
 
     let userImage = null;
+    let defaultImage = null;
+    let isDefaultImage = true;
     let overlayImage = new Image();
-    overlayImage.src = 'overlay.png';
 
     let scale = 1;
     let pos = { x: 0, y: 0 };
@@ -48,20 +50,43 @@
     let dragStart = { x: 0, y: 0 };
     let lastTouchDistance = null;
 
+    // Load the overlay image
     overlayImage.onload = () => {
       canvas.width = overlayImage.width;
       canvas.height = overlayImage.height;
-      overlay.width = overlayImage.width;
-      overlay.height = overlayImage.height;
+      // Once overlay is loaded, load the default preview image
+      loadDefaultImage();
     };
+    overlayImage.src = 'overlay.png';
+
+    function loadDefaultImage() {
+      defaultImage = new Image();
+      defaultImage.crossOrigin = "anonymous";
+      defaultImage.onload = () => {
+        userImage = defaultImage;
+        isDefaultImage = true;
+        scale = 0.7; // Zoom out to 70%
+        zoomSlider.value = scale;
+        pos = {
+          x: (canvas.width - defaultImage.width * scale) / 2,
+          y: (canvas.height - defaultImage.height * scale) / 2
+        };
+        draw();
+        // Enable zoom and reset for default image, but NOT download
+        zoomSlider.disabled = false;
+        resetBtn.disabled = false;
+        downloadBtn.disabled = true;
+      };
+      defaultImage.src = 'default-preview.png';
+    }
 
     function resetPosition() {
       if (!userImage) return;
-      scale = 1;
+      scale = isDefaultImage ? 0.7 : 1; // Keep 0.7 for default, 1 for user images
       zoomSlider.value = scale;
       pos = {
-        x: (canvas.width - userImage.width) / 2,
-        y: (canvas.height - userImage.height) / 2
+        x: (canvas.width - userImage.width * scale) / 2,
+        y: (canvas.height - userImage.height * scale) / 2
       };
       draw();
     }
@@ -85,13 +110,16 @@
         ctx.drawImage(userImage, pos.x, pos.y, w, h);
       }
 
+      // Draw the overlay on top
       ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
     }
 
     function downloadImage() {
-        // draw(); // Ensure canvas is up to date
+      // Only allow download if user uploaded their own image
+      if (isDefaultImage) return;
+      
       const link = document.createElement('a');
-      link.download = 'benfica-acima-de-tudo.png';
+      link.download = 'perfil-noronha-lopes.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
@@ -104,10 +132,11 @@
       reader.onload = function (event) {
         userImage = new Image();
         userImage.onload = () => {
+          isDefaultImage = false; // User uploaded their own image
           resetPosition();
           zoomSlider.disabled = false;
           resetBtn.disabled = false;
-          downloadBtn.disabled = false;
+          downloadBtn.disabled = false; // NOW enable download
         };
         userImage.src = event.target.result;
       };
@@ -122,14 +151,16 @@
     // Drag (Mouse)
     canvas.addEventListener('mousedown', e => {
       isDragging = true;
-      dragStart.x = e.offsetX - pos.x;
-      dragStart.y = e.offsetY - pos.y;
+      const rect = canvas.getBoundingClientRect();
+      dragStart.x = (e.clientX - rect.left) * (canvas.width / rect.width) - pos.x;
+      dragStart.y = (e.clientY - rect.top) * (canvas.height / rect.height) - pos.y;
     });
 
     canvas.addEventListener('mousemove', e => {
       if (!isDragging) return;
-      pos.x = e.offsetX - dragStart.x;
-      pos.y = e.offsetY - dragStart.y;
+      const rect = canvas.getBoundingClientRect();
+      pos.x = (e.clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
+      pos.y = (e.clientY - rect.top) * (canvas.height / rect.height) - dragStart.y;
       draw();
     });
 
@@ -141,8 +172,9 @@
     canvas.addEventListener('touchstart', e => {
       if (e.touches.length === 1) {
         isDragging = true;
-        dragStart.x = e.touches[0].clientX - pos.x;
-        dragStart.y = e.touches[0].clientY - pos.y;
+        const rect = canvas.getBoundingClientRect();
+        dragStart.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width) - pos.x;
+        dragStart.y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height) - pos.y;
       } else if (e.touches.length === 2) {
         lastTouchDistance = getTouchDistance(e.touches);
       }
@@ -151,8 +183,9 @@
     canvas.addEventListener('touchmove', e => {
       e.preventDefault();
       if (e.touches.length === 1 && isDragging) {
-        pos.x = e.touches[0].clientX - dragStart.x;
-        pos.y = e.touches[0].clientY - dragStart.y;
+        const rect = canvas.getBoundingClientRect();
+        pos.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width) - dragStart.x;
+        pos.y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height) - dragStart.y;
         draw();
       } else if (e.touches.length === 2) {
         const currentDistance = getTouchDistance(e.touches);
