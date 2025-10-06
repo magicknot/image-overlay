@@ -18,8 +18,8 @@ let lastTouchDistance = null;
 
 // Load the overlay image
 overlayImage.onload = () => {
-    canvas.width = Math.min(overlayImage.width/2, 500);
-    canvas.height = Math.min(overlayImage.height/2, 500);
+    canvas.width = Math.max(overlayImage.width, overlayImage.height);
+    canvas.height = Math.max(overlayImage.width, overlayImage.height);
     // Once overlay is loaded, load the default preview image
     loadDefaultImage();
 };
@@ -31,11 +31,11 @@ function loadDefaultImage() {
     defaultImage.onload = () => {
     userImage = defaultImage;
     isDefaultImage = true;
-    scale = 0.3; // Zoom out to 70%
+    scale = 1.4; // Zoom out to 70%
     zoomSlider.value = scale;
     pos = {
-        x: (canvas.width - defaultImage.width * scale) / 2,
-        y: (canvas.height - defaultImage.height * scale) / 2 + 100
+        x: (canvas.width - defaultImage.width * scale) / 2 - 50,
+        y: (canvas.height - defaultImage.height * scale) / 2 + 500
     };
     draw();
     zoomSlider.disabled = true;
@@ -50,7 +50,10 @@ function resetPosition() {
         return
     };
 
-    scale = isDefaultImage ? 0.7 : 1;
+    canvas.width = Math.max(userImage.width, userImage.height);
+    canvas.height = Math.max(userImage.width, userImage.height);
+
+    scale = 1.5;
     zoomSlider.value = scale;
     pos = {
         x: (canvas.width - userImage.width * scale) / 2,
