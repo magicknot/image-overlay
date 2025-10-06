@@ -20,7 +20,6 @@ html {
 
 /* Set core body defaults */
 body {
-  min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -97,15 +96,22 @@ h6 {
   font-style: italic;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: Poppins, Arial, sans-serif;
   background: #EB252C;
   color: white;
+  padding: 1rem;
 }
 
 header {
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 3.5rem;
   margin-bottom: 2rem;
 }
 
@@ -119,10 +125,10 @@ h1 {
   font-family: 'Mango Grotesque', Arial, sans-serif;
   font-weight: 600;
   font-style: italic;
-  font-size: clamp(2rem, 6vw, 4rem);
+  font-size: 2rem;
   line-height: 0.88;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   color: white;
 }
 
@@ -134,9 +140,12 @@ h1 {
 
   border: 1px solid white;
 
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  text-align: center;
   text-transform: uppercase;
   cursor: pointer;
+
+  max-width: 20rem;
 }
 
 .button-secondary {
@@ -170,9 +179,8 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2.5rem;
   width: 100%;
-  max-width: 400px;
 }
 
 #controls label {
@@ -187,8 +195,9 @@ h1 {
 }
 
 #zoomSlider {
-  width: 280px;
-  height: 6px;
+  width: 80vw;
+  max-width: 25rem;
+  height: 0.5rem;
   background: white;
   outline: none;
   cursor: pointer;
@@ -198,8 +207,8 @@ h1 {
 
 #zoomSlider::-webkit-slider-thumb {
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 2rem;
+  height: 2rem;
   background: white;
   border: 3px solid #EB252C;
   border-radius: 50%;
@@ -207,8 +216,8 @@ h1 {
 }
 
 #zoomSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 2rem;
+  height: 2rem;
   background: white;
   border: 3px solid #EB252C;
   border-radius: 50%;
@@ -223,8 +232,8 @@ h1 {
 #viewport {
   position: relative;
   margin-bottom: 1rem;
-  width: 22rem;
-  height: 22rem;
+  width: 85vw;
+  height: 85vw;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -241,4 +250,32 @@ h1 {
 
 #mainCanvas:active {
   cursor: grabbing;
+}
+
+@media (min-width: 1024px) {
+  /* html {
+    font-size: 16px;
+  } */
+  
+  h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+  }
+  
+  .button {
+    font-size: 1.1rem;
+  }
+
+  #viewport {
+    width: 22rem;
+    height: 22rem;
+  }
+
+  #zoomSlider {
+    height: 6px;
+  }
+
+  #zoomSlider::-webkit-slider-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 }
